@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
 //Register a new user
-
+let token = null;
 router.post("/register",async (req,res)=>{
     const newUser = new User({
         username:req.body.username,
@@ -30,19 +30,30 @@ router.post("/login",async (req,res)=>{
         const hashedPassword = CryptoJS.AES.decrypt(checkUser.password,process.env.SECRET);
         const oPassword = hashedPassword.toString(CryptoJS.enc.Utf8);
         oPassword!==req.body.password && res.status(400).json("Wrong Credentials");
-        const token = jwt.sign({
+        token = jwt.sign({
             id:checkUser._id,
             isAdmin:checkUser.isAdmin
         },
         process.env.JWT_KEY,
         {expiresIn:"2d"}
         )
+        console.log(token);
         const {password,...otherInfo} = checkUser._doc;
         res.status(200).json({...otherInfo,token});
     }catch(err){
         res.status(500).json(err);
 
     }
+
+})
+router.get("/logout",(req,res)=>{
+    try{
+        token = null;
+        
+    }catch(err){
+
+    }
+    res.status(200).json("hello");
 
 })
 
